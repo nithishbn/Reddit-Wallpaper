@@ -1,0 +1,106 @@
+#: import NoTransition kivy.uix.screenmanager.NoTransition
+#: import webbrowser webbrowser
+#: import Animation kivy.animation.Animation
+#:import MDTextField kivymd.textfields.MDTextField
+#:import MDLabel kivymd.label.MDLabel
+#:import MDRaisedButton kivymd.button.MDRaisedButton
+#:import colors kivymd.color_definitions.colors
+#:import Toolbar kivymd.toolbar.Toolbar
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import MDNavigationDrawer kivymd.navigationdrawer.MDNavigationDrawer
+#:import NavigationLayout kivymd.navigationdrawer.NavigationLayout
+#:import NavigationDrawerDivider kivymd.navigationdrawer.NavigationDrawerDivider
+#:import NavigationDrawerToolbar kivymd.navigationdrawer.NavigationDrawerToolbar
+#:import NavigationDrawerSubheader kivymd.navigationdrawer.NavigationDrawerSubheader
+#:import MDSeparator kivymd.card.MDSeparator
+#:import MDCard kivymd.card.MDCard
+# :import NDIconLabel kivymd.navigationdrawer.NDIconLabel
+#:import OneLineIconListItem kivymd.list.OneLineIconListItem
+#:import SmartTile kivymd.grid.SmartTile
+#: import softinput_mode kivy.core.window.Window
+#: import os os
+NavigationLayout:
+    pos_hint: {'top': 1}
+    id: nav_layout
+    # canvas:
+    #     Rectangle:
+    #         size: self.size
+    #         pos: self.pos
+    #     Color:
+    #         rgba: 1, 1, 1, 0.2
+    MDNavigationDrawer:
+        pos_hint: {'top': 1}
+        id: nav_drawer
+        NavigationDrawerToolbar:
+            #
+            title: "Navigation"
+        NavigationDrawerIconButton:
+            # icon: 'home-outline'
+            icon: 'home'
+            text: "Home"
+            on_release:
+                app.root.ids.sm.transition = NoTransition()
+                app.root.ids.sm.current = 'MenuScreen'
+
+
+    ScreenManager:
+        id: sm
+
+        MenuScreen:
+            name: 'MenuScreen'
+            id: menu
+            manager: sm
+            transition: NoTransition
+
+
+<MenuScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: 0.2
+            Toolbar:
+                pos_hint: {'top': 1}
+
+                id: toolbar
+                title: 'Reddit Wallpapers'
+                md_bg_color: app.theme_cls.primary_color
+                background_palette: 'Primary'
+                background_hue: '500'
+                left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
+        RelativeLayout:
+            orientation: 'vertical'
+            MDCard:
+                size_hint: 0.36, 0.64
+                pos_hint: {'top' :1,'x': 0.2}
+                elevation: 10
+                active_color_type: 'Custom'
+                active_color : [1, 0, 1, 1]
+                BoxLayout:
+                    orientation:'vertical'
+                    padding: dp(2)
+                    spacing: 10
+                    MDLabel:
+
+                        text: "Today's View"
+                        theme_text_color: 'Secondary'
+                        font_style:"Headline"
+                        size_hint_y: None
+                        height: dp(36)
+                        # halign: 'center'
+                        # padding: 50
+                        id: labelthing
+                    MDSeparator:
+                        height: dp(1)
+                        # padding: 50
+                        spacing: -10
+                    Image:
+                        mipmap: True
+                        size_hint: 1, 0.7
+                        source: "D:/Nithish/PythonProjects/RedditWallpaper/img/0uzzm5av3ruz.jpg"
+                        # md_bg_color: 'Secondary'
+                        # text: 'asdf'
+                    MDLabel:
+                        size_hint_y: None
+                        text: "There are quite a few cool things that are available today at the Temple"
+                        theme_text_color: 'Primary'
+                        font_style: 'Body2'
