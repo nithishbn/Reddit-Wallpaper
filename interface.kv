@@ -68,40 +68,41 @@ NavigationLayout:
                 background_palette: 'Primary'
                 background_hue: '500'
                 left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
+
         GridLayout:
             id: grid
+            size_hint: 1, 1
             rows: root.getRowNumber()
-            cols: 3
-            
+            cols: root.colsToUse
+            spacing: 15
+            padding: 50,0,50,0
 
 
 <Imagetile@MDCard>:
     id: imagetile
     size_hint: 0.50, 0.64
-    pos_hint: {'top': 1,'x': 0.1}
     elevation: 10
-    active_color_type: 'Custom'
-    active_color : [1, 0, 1, 1]
     BoxLayout:
         orientation:'vertical'
-        padding: dp(2)
-        spacing: 10
         MDLabel:
 
-            text: "hi"
+            text: root.title
             theme_text_color: 'Secondary'
-            font_style:"Headline"
+            font_style:"Title"
             size_hint_y: None
-            height: dp(36)
+            height: dp(48)
             # halign: 'center'
             spacing:10
             id: labelthing
         MDSeparator:
             height: dp(1)
-            padding: 10
+            # padding:
             spacing: -10
         Image:
-            mipmap: True
-            size_hint: 1, 0.7
+            # mipmap: True
+            size_hint:1,0.98
+            # size: 480,270
+            # height: 540
             source: root.source
+            allow_stretch: True
             # md_bg_color: 'Secondary'

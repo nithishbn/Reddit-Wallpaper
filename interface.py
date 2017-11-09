@@ -10,11 +10,14 @@ from threading import Thread
 import os
 import sqlite3
 from main import ImageScrapper, Setter
-
+from kivy.config import Config
+Config.set('graphics','resizable',0)
+from kivy.core.window import Window
+Window.size = (960, 540)
 
 class ImageTile(MDCard):
     source = StringProperty('')
-
+    title = StringProperty('')
 
 class MenuScreen(Screen):
     path = os.path.dirname(__file__) + '/img'
@@ -22,26 +25,31 @@ class MenuScreen(Screen):
     cur = conn.cursor()
     colsToUse = 3
     state = "reset"
-
+    submissionid = ""
     def on_pre_enter(self, *args):
         t = Thread(target=App.get_running_app().runApp, args=(App.get_running_app().listtouse, self.state))
         t.start()
 
-    def getTitle(self):
-        pass
-
+    def getTitle(self,submissionid):
+        values = self.cur.execute('''SELECT title FROM main WHERE main.id=?''',(submissionid,))
+        title = values.fetchall()[0][0]
+        print(title)
+        return title
+    # def getColsNumber(self):
+    #     return self.colsToUse
     def getRowNumber(self):
-        rows = 9 / self.colsToUse
-        return math.ceil(rows)
+        rows = math.ceil(9 / self.colsToUse)
+        print(rows)
+        return rows
 
     def addstuff(self, *args):
         lst = self.getAllPaths()
         for path in lst:
-            widget = Factory.ImageTile(source=path[0])
+            widget = Factory.ImageTile(source=path[1],title=self.getTitle(path[0]))
             self.ids.grid.add_widget(widget)
 
     def getAllPaths(self):
-        values = self.cur.execute('''SELECT path FROM main''')
+        values = self.cur.execute('''SELECT id,path FROM main''')
         values = values.fetchall()
         lst = []
         for i in values:
@@ -49,11 +57,12 @@ class MenuScreen(Screen):
         return lst
 
 
+
 class InterfaceApp(App):
     theme_cls = ThemeManager()
     listtouse = ListProperty([])
     MAX_TIME = 1 / 60.
-    conn = sqlite3.connect('data.sqlite')
+    conn = sqlite3.connect('data.sqlite',check_same_thread=False)
     cur = conn.cursor()
 
     def build(self):
@@ -64,9 +73,6 @@ class InterfaceApp(App):
             item = self.listtouse.pop(0)
             if item == 1:
                 Clock.schedule_once(self.root.ids.menu.addstuff, 0.1)
-
-    def totalImages(self):
-        self.cur.execute('''SELECT id FROM main''')
 
     def runApp(self, listtouse, state="normal", subreddit="wallpapers", number=10):
         if state == "reset" or subreddit != "wallpapers":

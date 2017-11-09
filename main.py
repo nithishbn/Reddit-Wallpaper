@@ -11,13 +11,13 @@ import config
 
 class ImageScrapper:
     path = os.path.join(os.path.dirname(__file__) + '\img\\')
-
+    conn = sqlite3.connect('data.sqlite',check_same_thread=False)
+    cur = conn.cursor()
     def __init__(self, subreddit):
         self.r = praw.Reddit(username=config.username, password=config.password, client_id=config.client_id,
                              client_secret=config.client_secret, user_agent="Nithishbn's ImageScrapper")
         self.subreddit = subreddit
-        self.conn = sqlite3.connect('data.sqlite')
-        self.cur = self.conn.cursor()
+
 
     def scrap(self, requested):
         subreddit = self.r.subreddit(self.subreddit)
