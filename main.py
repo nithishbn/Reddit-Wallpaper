@@ -29,15 +29,18 @@ class ImageScrapper:
             imagelink = submission.url
             submissionid = submission.id
             ids.append(submissionid)
+            height = 1080
             width = 1920
             if '.jpg' or '.png' in imagelink:
-                if submission.preview['images'][0]['source']['width'] >= width:
+                print(imagelink)
+                if (submission.preview['images'][0]['source']['height']/submission.preview['images'][0]['source']['width']) == (height/width):
                     urls.append(submission.url)
                     self.cur.execute('''INSERT OR IGNORE INTO main.main VALUES (?,?,?,?,?) ''',
                                      (submissionid, imagelink, title, 0, 0))
+                    count += 1
                 if count == requested:
                     break
-                count += 1
+
         self.conn.commit()
         urlcount = 1
         for url in urls:
@@ -45,7 +48,7 @@ class ImageScrapper:
             fileName = re.findall("(?:com|it|net).*\/(.*[(jpg),(png)]$)", url)
             submissionid = self.cur.execute('''SELECT id FROM main WHERE image=?''', (url,)).fetchall()[0][0]
             if len(fileName) == 0:
-                continue
+                self.cur.execute('''DELETE from main WHERE main.image=?''',(url,))
             else:
                 response = requests.get(url, stream=True)
                 actualPath = self.path + fileName[0]

@@ -54,11 +54,15 @@ NavigationLayout:
 
 <MenuScreen>:
     id: menu
+    # grid: grid
     BoxLayout:
         orientation: 'vertical'
         id: menuscreenbox
+        spacing: 2
+
         BoxLayout:
-            size_hint_y: 0.2
+            size_hint_y: 0.05
+            id: toolbarbox
             Toolbar:
                 pos_hint: {'top': 1}
 
@@ -68,20 +72,29 @@ NavigationLayout:
                 background_palette: 'Primary'
                 background_hue: '500'
                 left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
+        BoxLayout:
+            size_hint: 1, 0.78
+            ScrollView:
+                # size_hint: 1, 1
+                width: root.width
 
-        GridLayout:
-            id: grid
-            size_hint: 1, 1
-            rows: root.getRowNumber()
-            cols: root.colsToUse
-            spacing: 15
-            padding: 50,0,50,0
+                GridLayout:
+                    id: grid
+                    size_hint_y: None
+                    # pos_hint: {'top':0.90}
+                    height: self.minimum_height + 50
+                    rows: root.getRowNumber(root.getTotalSubmissions())
+                    cols: root.colsToUse
+                    spacing: 30
+                    padding: 50,0,50,0
+                    # minimum_height: self.setter('height')
 
 
 <Imagetile@MDCard>:
     id: imagetile
-    size_hint: 0.50, 0.64
     elevation: 10
+    size_hint_y:None
+    size: (Window.width/4 -50), 270
     BoxLayout:
         orientation:'vertical'
         MDLabel:
@@ -90,19 +103,14 @@ NavigationLayout:
             theme_text_color: 'Secondary'
             font_style:"Title"
             size_hint_y: None
-            height: dp(48)
-            # halign: 'center'
-            spacing:10
+            height: dp(28)
+            # width: dp(30)
             id: labelthing
         MDSeparator:
-            height: dp(1)
-            # padding:
-            spacing: -10
+            height: dp(0.5)
+            spacing: 10
         Image:
-            # mipmap: True
-            size_hint:1,0.98
-            # size: 480,270
-            # height: 540
             source: root.source
-            allow_stretch: True
-            # md_bg_color: 'Secondary'
+            # allow_stretch: True
+            size: root.size
+            width: root.width

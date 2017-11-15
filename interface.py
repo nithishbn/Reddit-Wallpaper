@@ -1,7 +1,7 @@
 import math
 from kivy.app import App
 from kivy.factory import Factory
-from kivy.properties import ListProperty, StringProperty, NumericProperty
+from kivy.properties import ListProperty, StringProperty
 from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen
 from kivymd.card import MDCard
@@ -10,42 +10,53 @@ from threading import Thread
 import os
 import sqlite3
 from main import ImageScrapper, Setter
-from kivy.config import Config
-Config.set('graphics','resizable',0)
 from kivy.core.window import Window
-Window.size = (960, 540)
+
+# Window.size = (900, 600)
+Window.maximize()
+
 
 class ImageTile(MDCard):
     source = StringProperty('')
     title = StringProperty('')
 
+
 class MenuScreen(Screen):
     path = os.path.dirname(__file__) + '/img'
     conn = sqlite3.connect('data.sqlite')
     cur = conn.cursor()
-    colsToUse = 3
-    state = "reset"
-    submissionid = ""
-    def on_pre_enter(self, *args):
-        t = Thread(target=App.get_running_app().runApp, args=(App.get_running_app().listtouse, self.state))
-        t.start()
+    colsToUse = 4
 
-    def getTitle(self,submissionid):
-        values = self.cur.execute('''SELECT title FROM main WHERE main.id=?''',(submissionid,))
+    submissionid = ""
+
+    def getTitle(self, submissionid):
+        values = self.cur.execute('''SELECT title FROM main WHERE main.id=?''', (submissionid,))
         title = values.fetchall()[0][0]
-        print(title)
-        return title
-    # def getColsNumber(self):
-    #     return self.colsToUse
-    def getRowNumber(self):
-        rows = math.ceil(9 / self.colsToUse)
-        print(rows)
+        newtitle = ""
+        for character in title:
+            if len(newtitle) >= 40:
+                newtitle += "..."
+                break
+            newtitle += character
+        return str(newtitle)
+
+    def getRowNumber(self, totalSubmissions):
+        rows = math.ceil(totalSubmissions / self.colsToUse)
+        print("rows", rows)
         return rows
+
+    def getTotalSubmissions(self):
+        values = self.cur.execute('''SELECT id FROM main''')
+        values = values.fetchall()
+        count = 0
+        for i in values:
+            count += 1
+        return count
 
     def addstuff(self, *args):
         lst = self.getAllPaths()
         for path in lst:
-            widget = Factory.ImageTile(source=path[1],title=self.getTitle(path[0]))
+            widget = Factory.ImageTile(source=str(path[1]), title=self.getTitle(path[0]))
             self.ids.grid.add_widget(widget)
 
     def getAllPaths(self):
@@ -57,15 +68,18 @@ class MenuScreen(Screen):
         return lst
 
 
-
 class InterfaceApp(App):
     theme_cls = ThemeManager()
     listtouse = ListProperty([])
-    MAX_TIME = 1 / 60.
-    conn = sqlite3.connect('data.sqlite',check_same_thread=False)
+    conn = sqlite3.connect('data.sqlite', check_same_thread=False)
     cur = conn.cursor()
+    state = "reset"
+    numberOfImages = 15
 
     def build(self):
+        t = Thread(target=App.get_running_app().runApp,
+                   args=(App.get_running_app().listtouse, self.state, "wallpapers", self.numberOfImages))
+        t.start()
         Clock.schedule_interval(self.consume, 0)
 
     def consume(self, *args):
@@ -74,7 +88,7 @@ class InterfaceApp(App):
             if item == 1:
                 Clock.schedule_once(self.root.ids.menu.addstuff, 0.1)
 
-    def runApp(self, listtouse, state="normal", subreddit="wallpapers", number=10):
+    def runApp(self, listtouse, state="normal", subreddit="wallpapers", number=20):
         if state == "reset" or subreddit != "wallpapers":
             i = ImageScrapper(subreddit)
             self.cur.execute('''DELETE FROM main WHERE favorited==0''')
