@@ -41,6 +41,13 @@ NavigationLayout:
             on_release:
                 app.root.ids.sm.transition = NoTransition()
                 app.root.ids.sm.current = 'MenuScreen'
+        NavigationDrawerIconButton:
+            # icon: 'home-outline'
+            icon: 'settings'
+            text: "Settings"
+            on_release:
+                app.root.ids.sm.transition = NoTransition()
+                app.root.ids.sm.current = 'SettingsScreen'
 
 
     ScreenManager:
@@ -48,8 +55,12 @@ NavigationLayout:
         MenuScreen:
             name: 'MenuScreen'
             id: menu
-            manager: sm
-            transition: NoTransition
+
+        SettingsScreen:
+            name: 'SettingsScreen'
+            id: settings
+
+
 
 
 <MenuScreen>:
@@ -88,7 +99,28 @@ NavigationLayout:
                     spacing: 30
                     padding: 50,0,50,0
                     # minimum_height: self.setter('height')
+<SettingsScreen>:
+    id: settings
+    # grid: grid
+    BoxLayout:
+        orientation: 'vertical'
 
+        spacing: 2
+
+        BoxLayout:
+            size_hint_y: 0.05
+            id: toolbarbox
+            Toolbar:
+                pos_hint: {'top': 1}
+
+                id: toolbar
+                title: 'Reddit Wallpapers'
+                md_bg_color: app.theme_cls.primary_color
+                background_palette: 'Primary'
+                background_hue: '500'
+                left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
+        MDLabel:
+            text: "hi"
 
 <Imagetile@MDCard>:
     id: imagetile

@@ -1,16 +1,18 @@
 import math
+import os
+import sqlite3
+from threading import Thread
+
 from kivy.app import App
+from kivy.clock import Clock
+from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.properties import ListProperty, StringProperty
-from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen
 from kivymd.card import MDCard
 from kivymd.theming import ThemeManager
-from threading import Thread
-import os
-import sqlite3
-from main import ImageScrapper, Setter
-from kivy.core.window import Window
+
+from main import ImageScrapper
 
 # Window.size = (900, 600)
 Window.maximize()
@@ -20,6 +22,9 @@ class ImageTile(MDCard):
     source = StringProperty('')
     title = StringProperty('')
 
+
+class SettingsScreen(Screen):
+    pass
 
 class MenuScreen(Screen):
     path = os.path.dirname(__file__) + '/img'
@@ -46,12 +51,10 @@ class MenuScreen(Screen):
         return rows
 
     def getTotalSubmissions(self):
-        values = self.cur.execute('''SELECT id FROM main''')
-        values = values.fetchall()
-        count = 0
-        for i in values:
-            count += 1
-        return count
+        values = self.cur.execute('''SELECT COUNT(id) FROM main''')
+        values = values.fetchall()[0][0]
+        print(values)
+        return values
 
     def addstuff(self, *args):
         lst = self.getAllPaths()
@@ -74,7 +77,7 @@ class InterfaceApp(App):
     conn = sqlite3.connect('data.sqlite', check_same_thread=False)
     cur = conn.cursor()
     state = "reset"
-    numberOfImages = 15
+    numberOfImages = 20
 
     def build(self):
         t = Thread(target=App.get_running_app().runApp,
