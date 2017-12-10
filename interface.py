@@ -8,23 +8,30 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.properties import ListProperty, StringProperty
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.screenmanager import Screen
 from kivymd.card import MDCard
+from kivymd.navigationdrawer import NavigationLayout
 from kivymd.theming import ThemeManager
-
 from main import ImageScrapper
 
 # Window.size = (900, 600)
 Window.maximize()
 
 
-class ImageTile(MDCard):
+class ImageTile(ButtonBehavior, MDCard):
     source = StringProperty('')
     title = StringProperty('')
+    idThing = StringProperty('')
+
+    def zoom(self, source):
+        widget = Factory.Image(source=source, pos_hint={'center_x': 0.5, 'center_y': 0.45}, size_hint=(1, 0.85))
+        App.get_running_app().root.ids.menu.add_widget(widget)
 
 
 class SettingsScreen(Screen):
     pass
+
 
 class MenuScreen(Screen):
     path = os.path.dirname(__file__) + '/img'
@@ -59,7 +66,7 @@ class MenuScreen(Screen):
     def addstuff(self, *args):
         lst = self.getAllPaths()
         for path in lst:
-            widget = Factory.ImageTile(source=str(path[1]), title=self.getTitle(path[0]))
+            widget = Factory.ImageTile(source=str(path[1]), title=self.getTitle(path[0]), idThing=path[0])
             self.ids.grid.add_widget(widget)
 
     def getAllPaths(self):
@@ -77,7 +84,7 @@ class InterfaceApp(App):
     conn = sqlite3.connect('data.sqlite', check_same_thread=False)
     cur = conn.cursor()
     state = "reset"
-    numberOfImages = 20
+    numberOfImages = 30
 
     def build(self):
         t = Thread(target=App.get_running_app().runApp,

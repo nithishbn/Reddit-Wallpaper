@@ -85,6 +85,8 @@ NavigationLayout:
                 left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
         BoxLayout:
             size_hint: 1, 0.78
+
+            orientation: 'vertical'
             ScrollView:
                 # size_hint: 1, 1
                 width: root.width
@@ -99,6 +101,9 @@ NavigationLayout:
                     spacing: 30
                     padding: 50,0,50,0
                     # minimum_height: self.setter('height')
+
+
+
 <SettingsScreen>:
     id: settings
     # grid: grid
@@ -124,9 +129,11 @@ NavigationLayout:
 
 <Imagetile@MDCard>:
     id: imagetile
+    idThing: root.idThing
     elevation: 10
     size_hint_y:None
     size: (Window.width/4 -50), 270
+    on_release: self.zoom(self.source)
     BoxLayout:
         orientation:'vertical'
         MDLabel:
