@@ -14,7 +14,7 @@ from kivymd.card import MDCard
 from kivymd.navigationdrawer import NavigationLayout
 from kivymd.theming import ThemeManager
 from main import ImageScrapper
-
+from kivymd import icon_definitions
 # Window.size = (900, 600)
 Window.maximize()
 
@@ -84,11 +84,11 @@ class InterfaceApp(App):
     conn = sqlite3.connect('data.sqlite', check_same_thread=False)
     cur = conn.cursor()
     state = "reset"
-    numberOfImages = 30
+    numberOfImages = 10
 
     def build(self):
         t = Thread(target=App.get_running_app().runApp,
-                   args=(App.get_running_app().listtouse, self.state, "wallpapers", self.numberOfImages))
+                   args=(App.get_running_app().listtouse, self.state, "EarthPorn",self.numberOfImages))
         t.start()
         Clock.schedule_interval(self.consume, 0)
 
@@ -98,7 +98,7 @@ class InterfaceApp(App):
             if item == 1:
                 Clock.schedule_once(self.root.ids.menu.addstuff, 0.1)
 
-    def runApp(self, listtouse, state="normal", subreddit="wallpapers", number=20):
+    def runApp(self, listtouse, state="normal", subreddit="EarthPorn", number=20):
         if state == "reset" or subreddit != "wallpapers":
             i = ImageScrapper(subreddit)
             self.cur.execute('''DELETE FROM main WHERE favorited==0''')

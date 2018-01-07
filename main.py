@@ -38,8 +38,7 @@ class ImageScrapper:
             fileName = re.findall("(?:com|it|net).*/(.*[(jpg),(png)]$)", url)
             if ('.jpg' or '.png' in url) and len(fileName) != 0:
                 print(url)
-                if (submission.preview['images'][0]['source']['height'] / submission.preview['images'][0]['source'][
-                    'width']) == (height / width):
+                if submission.preview['images'][0]['source']['height'] >= height or submission.preview['images'][0]['source']['width']>=width:
                     # urls.append(submission.url)
                     print("Downloading {} of {}".format(count + 1, requested))
                     self.cur.execute('''INSERT OR IGNORE INTO main.main VALUES (?,?,?,?,?) ''',
