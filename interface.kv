@@ -17,6 +17,7 @@
 # :import NDIconLabel kivymd.navigationdrawer.NDIconLabel
 #:import OneLineIconListItem kivymd.list.OneLineIconListItem
 #:import SmartTile kivymd.grid.SmartTile
+#:import MDIconButton kivymd.button.MDIconButton
 #: import softinput_mode kivy.core.window.Window
 #: import os os
 NavigationLayout:
@@ -126,10 +127,30 @@ NavigationLayout:
                 left_action_items: [['menu', lambda x: app.root.toggle_nav_drawer()]]
         MDLabel:
             text: "hi"
+<ZoomImage@FloatLayout>:
+    id: zoom
+
+    Image:
+        source:root.source
+    # BoxLayout:
+        # size: self.ids.x.size
+
+
+    MDIconButton:
+        canvas.before:
+            Rectangle:
+                size:self.size
+                pos: self.pos
+        id: x
+        pos_hint: {'x':0.92,'top':0.99}
+        size_hint:0.03, 0.03
+        icon: "close-circle-outline"
+        on_release:root.ids.menu.remove_widget(root.ids.zoom)
+
+
 
 <Imagetile@MDCard>:
     id: imagetile
-    idThing: root.idThing
     elevation: 10
     size_hint_y:None
     size: (Window.width/4 -50), 270

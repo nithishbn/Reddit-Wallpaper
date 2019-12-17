@@ -9,24 +9,28 @@ from kivy.core.window import Window
 from kivy.factory import Factory
 from kivy.properties import ListProperty, StringProperty
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.floatlayout import FloatLayout
+from kivymd.icon_definitions import md_icons
 from kivy.uix.screenmanager import Screen
-from kivymd.card import MDCard
-from kivymd.navigationdrawer import NavigationLayout
+from kivymd.uix.card import MDCard
 from kivymd.theming import ThemeManager
 from main import ImageScrapper
-from kivymd import icon_definitions
-# Window.size = (900, 600)
+
 Window.maximize()
 
 
 class ImageTile(ButtonBehavior, MDCard):
     source = StringProperty('')
     title = StringProperty('')
-    idThing = StringProperty('')
 
     def zoom(self, source):
-        widget = Factory.Image(source=source, pos_hint={'center_x': 0.5, 'center_y': 0.45}, size_hint=(1, 0.85))
+        widget = Factory.ZoomImage(source=source)
         App.get_running_app().root.ids.menu.add_widget(widget)
+
+
+class ZoomImage(FloatLayout):
+    source = StringProperty('')
+
 
 
 class SettingsScreen(Screen):
@@ -65,8 +69,9 @@ class MenuScreen(Screen):
 
     def addstuff(self, *args):
         lst = self.getAllPaths()
+        print("Adding images")
         for path in lst:
-            widget = Factory.ImageTile(source=str(path[1]), title=self.getTitle(path[0]), idThing=path[0])
+            widget = Factory.ImageTile(source=str(path[1]), title=self.getTitle(path[0]))
             self.ids.grid.add_widget(widget)
 
     def getAllPaths(self):
@@ -83,12 +88,12 @@ class InterfaceApp(App):
     listtouse = ListProperty([])
     conn = sqlite3.connect('data.sqlite', check_same_thread=False)
     cur = conn.cursor()
-    state = "reset"
+    state = ""
     numberOfImages = 10
 
     def build(self):
         t = Thread(target=App.get_running_app().runApp,
-                   args=(App.get_running_app().listtouse, self.state, "EarthPorn",self.numberOfImages))
+                   args=(App.get_running_app().listtouse, self.state, "", self.numberOfImages))
         t.start()
         Clock.schedule_interval(self.consume, 0)
 
@@ -98,7 +103,9 @@ class InterfaceApp(App):
             if item == 1:
                 Clock.schedule_once(self.root.ids.menu.addstuff, 0.1)
 
-    def runApp(self, listtouse, state="normal", subreddit="EarthPorn", number=20):
+    def runApp(self, listtouse, state="normal", subreddit="low_poly", number=20):
+        if subreddit == "":
+            subreddit = "low_poly"
         if state == "reset" or subreddit != "wallpapers":
             i = ImageScrapper(subreddit)
             self.cur.execute('''DELETE FROM main WHERE favorited==0''')
@@ -106,6 +113,8 @@ class InterfaceApp(App):
             self.conn.close()
             i.cleanDirectory()
             i.scrap(number)
+            listtouse.append(1)
+        else:
             listtouse.append(1)
 
 

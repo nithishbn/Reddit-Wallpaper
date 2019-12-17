@@ -1,9 +1,11 @@
 import ctypes
+import glob
 import os
 import re
 import shutil
 import sqlite3
 import time
+from os import listdir
 
 import praw
 import requests
@@ -28,7 +30,7 @@ class ImageScrapper:
         ids = []
         # urlcount = 1
 
-        for submission in subreddit.top('month'):
+        for submission in subreddit.top('week'):
             title = submission.title
             url = submission.url
             submissionid = submission.id
@@ -38,7 +40,9 @@ class ImageScrapper:
             fileName = re.findall("(?:com|it|net).*/(.*[(jpg),(png)]$)", url)
             if ('.jpg' or '.png' in url) and len(fileName) != 0:
                 print(url)
-                if submission.preview['images'][0]['source']['height'] >= height or submission.preview['images'][0]['source']['width']>=width:
+                submissionHeight = submission.preview['images'][0]['source']['height']
+                submissionWidth = submission.preview['images'][0]['source']['width']
+                if (submissionHeight/ submissionWidth) >= (height / width) and (submissionHeight>=height and submissionWidth>=width):
                     # urls.append(submission.url)
                     print("Downloading {} of {}".format(count + 1, requested))
                     self.cur.execute('''INSERT OR IGNORE INTO main.main VALUES (?,?,?,?,?) ''',
@@ -65,18 +69,53 @@ class ImageScrapper:
 
 
 class Setter:
-    path = os.path.join(os.path.dirname(__file__) + '/img')
+    path = os.path.join(os.path.dirname(__file__)) + r"\img"
+    SPI_SETDESKWALLPAPER = 20
 
     def __init__(self):
         print("Setting backgrounds!")
+        print(self.path)
+        self.setWallpaperIndefinitely(5)
 
-    def setWallpaper(self, timer):
+    def setWallpaperIndefinitely(self, timer):
         while True:
-            for file in os.listdir(self.path):
-                print(file)
-                SPI_SETDESKWALLPAPER = 20
-                ctypes.windll.user32.SystemParametersInfoW(SPI_SETDESKWALLPAPER, 0,
-                                                           self.path.format(
-                                                               file),
-                                                           0)
-                time.sleep(timer)
+            for r, d, f in os.walk(self.path):
+                for file in f:
+                    if ".jpg" in file or ".png" in file:
+                        self.setWallpaper(os.path.join(r, file))
+                        time.sleep(timer)
+            # images = [os.path.abspath(f) for f in os.listdir(self.path) if ".png" in f]
+            # print(images)
+            # for f in glob.glob("*.jpg"):
+            #     print(f)
+            # time.sleep(2)
+            # for file in images:
+            #     print(file)
+            #     #self.setWallpaper(file)
+            #     #time.sleep(timer)
+
+    def setWallpaper(self, imagefile):
+        ctypes.windll.user32.SystemParametersInfoW(self.SPI_SETDESKWALLPAPER, 0,
+                                                   imagefile,
+                                                   0)
+
+
+if __name__ == '__main__':
+    conn = sqlite3.connect('data.sqlite', check_same_thread=False)
+    cur = conn.cursor()
+    state = ""
+    numberOfImages = 10
+
+
+    def runApp(state="normal", subreddit="earthporn", number=20):
+        if state=="reset":
+            i = ImageScrapper(subreddit)
+            cur.execute('''DELETE FROM main WHERE favorited==0''')
+            conn.commit()
+            conn.close()
+            i.cleanDirectory()
+            i.scrap(number)
+        s = Setter()
+
+    runApp(state="reset")
+
